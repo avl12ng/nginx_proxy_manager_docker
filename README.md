@@ -21,12 +21,6 @@ cd nginx_proxy_manager_docker
 
 ### 2. Configure your environment
 
-Copy the template and list your running container names in the CONTAINERS_TO_LINK array:
-```bash
-chmod +x npm_build.sh
-./npm_build.sh
-```
-
 ⚙️ Configuration (npm.conf)
 
 The deployment is managed via the npm.conf file. This file centralizes your network settings, container links, and host port mappings.
