@@ -63,19 +63,34 @@ CONTAINERS_TO_LINK=(
 COMPOSE_FILE="docker-compose.yml"
 ```
 
-🔒 SSL Management
+### 3. Deployment
 
-If you use externally generated certificates:
+Deploy the NPM container
+```bash
+chmod +x npm_build.sh
+./npm_build.sh
+```
+
+### 4. Log in to the Admin
+
+When your docker container is running, connect to it on port 81 for the admin interface. Sometimes this can take a little bit because of the entropy of keys.
+```plaintext
+http://127.0.0.1:81
+```
+
+### 5. SSL Management
+
+🔒 If you use externally generated certificates:
 
 - Copy your fullchain.pem and privkey.pem into the ./data/custom_ssl/npm-X folder (where X is your certificate ID in NPM).
 - The script executes nginx -s reload within the container to apply updates without dropping active connections.
 
-📜 Credits
+### 6. Credits
 
 This project automates the setup of the excellent Nginx Proxy Manager.
 
-    Credits to Nginx Proxy Manager for the original sources and Docker images.
+📜 Credits to Nginx Proxy Manager for the original sources and Docker images.
 
-⚖️ License
+### 7. License
 
-This project is open-source and available under the MIT License.
+⚖️ This project is open-source and available under the MIT License.
