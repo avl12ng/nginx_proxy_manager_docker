@@ -1,32 +1,39 @@
 # =================================================================
-# Nginx Proxy Manager Automator Configuration
+# Nginx Proxy Manager Automator Configuration Template
 # =================================================================
 
-# --- Shared Network Configuration ---
-# This is the Docker bridge network shared between NPM and your apps
+# --- 1. SHARED NETWORK CONFIGURATION ---
+# The Docker bridge network shared between NPM and your apps.
 PROXY_NETWORK="nginx-proxy-network"
 
-# --- Services to Link ---
-# List the EXACT container names of your applications to be proxied.
-# NPM will be able to reach them using these names.
+# --- 2. TARGET CONTAINERS ---
+# List the exact container names to be connected to the proxy.
+# Format: ("container_name1" "container_name2" "container_name3")
 CONTAINERS_TO_LINK=(
     "container_name1"
     "container_name2"
+    "container_name3"
 )
 
-# --- Host Port Configuration ---
-# These are the ports exposed on your physical server.
-# Change them if you have other services already using these ports.
+# --- 3. HOST PORT SETTINGS ---
+# Change these if ports 80, 443, or 81 are already in use on your host.
 HTTP_PORT=80
 HTTPS_PORT=443
 ADMIN_PORT=81
 
-# --- Custom SSL Certificate Path ---
-# The absolute path on your HOST machine where your SSL certificates are stored.
-# This folder MUST contain 'fullchain.pem' and 'privkey.pem'.
-# Inside the container, this will be mapped to /data/custom_ssl/npm-1
-SSL_CERT_PATH="/data/ssl/domain.org"
+# --- 4. CUSTOM SSL CONFIGURATION ---
+# SSL_ROOT_PATH: Absolute path to your central SSL directory on the host.
+SSL_ROOT_PATH="/data/ssl"
 
-# --- Docker Compose Settings ---
-# The filename of your Nginx Proxy Manager compose file
+# CUSTOM_CERTIFICATES: Mapping between NPM Certificate IDs and Domain Folders.
+# Format: "NPM_ID:FOLDER_NAME"
+# - NPM_ID: The ID assigned by the NPM Web UI (1, 2, 3...)
+# - FOLDER_NAME: The subfolder name inside SSL_ROOT_PATH
+CUSTOM_CERTIFICATES=(
+    "1:test.org"
+    "2:website.domain.org"
+)
+
+# --- 5. DOCKER COMPOSE SETTINGS ---
+# The filename of your Nginx Proxy Manager compose file.
 COMPOSE_FILE="docker-compose.yml"
