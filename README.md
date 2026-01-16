@@ -4,8 +4,6 @@ A robust Bash-based automation tool to deploy **Nginx Proxy Manager (NPM)** and 
 
 Instead of manually configuring networks for every service, this script handles the infrastructure logic, ensuring your reverse proxy is instantly connected to your target services.
 
-
-
 ## 🌟 Key Features
 
 - **Idempotent Deployment**: Safe to run multiple times; it only performs necessary updates.
@@ -31,37 +29,45 @@ chmod +x npm_build.sh
 
 ⚙️ Configuration (npm.conf)
 
-The script relies on npm.conf to identify which services to bridge:
+The deployment is managed via the npm.conf file. This file centralizes your network settings, container links, and host port mappings.
 
-- **PROXY_NETWORK**: The name of the shared Docker bridge network.
-- **CONTAINERS_TO_LINK**: A list of container names.
+Setup your configuration file
 
-Copy the example file to create your own configuration
+First, create your local configuration by copying the provided template:
 ```bash
 cp npm.conf.example npm.conf
 ```
+Define your variables
 
-Edit npm.conf and list your container names in CONTAINERS_TO_LINK
+Open `npm.conf` and adjust the following parameters to match your environment:
 ```bash
-# --- Nginx Proxy Manager Automator Configuration Template ---
-
 # 1. SHARED NETWORK CONFIGURATION
-# This is the bridge network that NPM and your apps will share.
 PROXY_NETWORK="nginx-proxy-network"
 
 # 2. TARGET CONTAINERS
-# List the names of the containers you want to link to the proxy.
-# Use spaces to separate names.
-# Example: ("website" "database-admin" "api-service")
 CONTAINERS_TO_LINK=(
     "container_name1"
     "container_name2"
 )
 
-# 3. DOCKER COMPOSE SETTINGS
-# The filename of your Nginx Proxy Manager compose file
+# 3. HOST PORT SETTINGS
+HTTP_PORT=80
+HTTPS_PORT=443
+ADMIN_PORT=81
+
+# 4. CUSTOM SSL CONFIGURATION
+SSL_CERT_PATH="/data/ssl/domain.org"
+
+# 5. DOCKER COMPOSE SETTINGS
 COMPOSE_FILE="docker-compose.yml"
 ```
+| Variable | Description |
+| :--- | :--- |
+| **PROXY_NETWORK** | The name of the shared Docker bridge network for the proxy. |
+| **CONTAINERS_TO_LINK** | Array of container names to be automatically connected to the proxy. |
+| **HTTP/HTTPS_PORT** | Public ports exposed on your host (defaults to 80/443). |
+| **ADMIN_PORT** | The port used to access the NPM Web Dashboard (default 81). |
+| **SSL_CERT_PATH** | Absolute host path to your SSL folder (must contain `fullchain.pem` & `privkey.pem`). |
 
 ### 3. Deployment
 
