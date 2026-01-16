@@ -8,8 +8,11 @@ Instead of manually configuring networks for every service, this script handles 
 
 - **Idempotent Deployment**: Safe to run multiple times; it only performs necessary updates.
 - **Auto-Linking**: Automatically attaches existing or new containers to the shared proxy network.
+- **Multi-SSL Management**: Specialized logic to map multiple externally managed SSL certificates to NPM.
 - **Persistence**: Configures containers to restart automatically and maintain connectivity after host reboots.
-- **External SSL Support**: Optimized for users who manage their own certificates (custom import) with zero-downtime reloads.
+- **Zero-Downtime**: Executes hot-reloads for Nginx when certificates are updated.
+
+---
 
 ## 🚀 Quick Start
 
@@ -20,77 +23,78 @@ cd nginx_proxy_manager_docker
 ```
 
 ### 2. Configure your environment
-
-⚙️ Configuration (npm.conf)
-
-The deployment is managed via the npm.conf file. This file centralizes your network settings, container links, and host port mappings.
-
-Setup your configuration file
-
-First, create your local configuration by copying the provided template:
+The deployment is managed via the `npm.conf` file. Create yours from the template:
 ```bash
 cp npm.conf.example npm.conf
 ```
-Define your variables
-
-Open `npm.conf` and adjust the following parameters to match your environment:
-```bash
-# 1. SHARED NETWORK CONFIGURATION
-PROXY_NETWORK="nginx-proxy-network"
-
-# 2. TARGET CONTAINERS
-CONTAINERS_TO_LINK=(
-    "container_name1"
-    "container_name2"
-)
-
-# 3. HOST PORT SETTINGS
-HTTP_PORT=80
-HTTPS_PORT=443
-ADMIN_PORT=81
-
-# 4. CUSTOM SSL CONFIGURATION
-SSL_CERT_PATH="/data/ssl/domain.org"
-
-# 5. DOCKER COMPOSE SETTINGS
-COMPOSE_FILE="docker-compose.yml"
-```
-| Variable | Description |
-| :--- | :--- |
-| **PROXY_NETWORK** | The name of the shared Docker bridge network for the proxy. |
-| **CONTAINERS_TO_LINK** | Array of container names to be automatically connected to the proxy. |
-| **HTTP/HTTPS_PORT** | Public ports exposed on your host (defaults to 80/443). |
-| **ADMIN_PORT** | The port used to access the NPM Web Dashboard (default 81). |
-| **SSL_CERT_PATH** | Absolute host path to your SSL folder (must contain `fullchain.pem` & `privkey.pem`). |
 
 ### 3. Deployment
-
-Deploy the NPM container
+Make the script executable and run it to deploy the stack and link your containers:
 ```bash
 chmod +x npm_build.sh
 ./npm_build.sh
 ```
 
-### 4. Log in to the Admin
+---
 
-When your docker container is running, connect to it on port 81 for the admin interface. Sometimes this can take a little bit because of the entropy of keys.
-```plaintext
-http://127.0.0.1:81
+## ⚙️ Configuration (npm.conf)
+
+Open `npm.conf` and adjust the variables to match your environment:
+
+| Variable | Description |
+| :--- | :--- |
+| **PROXY_NETWORK** | Name of the shared Docker bridge network. |
+| **CONTAINERS_TO_LINK** | Array of container names to be connected to the proxy. |
+| **HTTP_PORT** | Public HTTP port (default 80). |
+| **HTTPS_PORT** | Public HTTPS port (default 443). |
+| **ADMIN_PORT** | NPM Admin Dashboard port (default 81). |
+| **SSL_ROOT_PATH** | Absolute host path to your central SSL store. |
+| **CUSTOM_CERTIFICATES** | Mapping of "NPM_ID:FOLDER_NAME" for SSL. |
+
+### Configuration Example
+```bash
+# Shared Network
+PROXY_NETWORK="nginx-proxy-network"
+
+# Apps to proxy
+CONTAINERS_TO_LINK=("container_name1" "container_name2")
+
+# SSL Mapping (NPM_ID:FOLDER_NAME)
+SSL_ROOT_PATH="/data/ssl"
+CUSTOM_CERTIFICATES=(
+    "1:test.org"
+    "2:website.domain.org"
+)
 ```
+---
 
-### 5. SSL Management
+## 🔒 SSL Management (External Certificates)
 
-🔒 If you use externally generated certificates:
+This script automates the mapping of certificates managed outside of NPM (e.g., Certbot or manual).
 
-- Copy your fullchain.pem and privkey.pem into the ./data/custom_ssl/npm-X folder (where X is your certificate ID in NPM).
-- The script executes nginx -s reload within the container to apply updates without dropping active connections.
+- Host Structure: Store certificates in `/data/ssl/domain.tld/` containing `fullchain.pem` and `privkey.pem`.
+- NPM ID: Create a "Custom Certificate" in the NPM Web UI (Port 81). The first one will be ID 1.
+- Symlinks: The script mounts your SSL root in Read-Only mode and creates symbolic links to `/data/custom_ssl/npm-X/` automatically.
 
-### 6. Credits
+---
+
+## 🖥️ Log in to the Admin Panel
+
+URL: `http://<your-server-ip>:81`
+
+Default Credentials:
+- Email: admin@example.com
+- Password: changeme
+
+---
+
+## 📜 Credits
 
 This project automates the setup of the excellent Nginx Proxy Manager.
+- Credits to Nginx Proxy Manager for the original sources and Docker images.
 
-📜 Credits to Nginx Proxy Manager for the original sources and Docker images.
+---
 
-### 7. License
+## ⚖️ License
 
-⚖️ This project is open-source and available under the MIT License.
+This project is open-source and available under the MIT License.
