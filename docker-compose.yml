@@ -1,0 +1,24 @@
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      # Public ports mapped from your npm.conf via the .env file
+      - '${HTTP_PORT}:80'
+      - '${HTTPS_PORT}:443'
+      - '${ADMIN_PORT}:81'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+      # Mount the global SSL directory in Read-Only mode
+      # The script will create symbolic links from here to /data/custom_ssl/npm-X
+      - ${SSL_ROOT_PATH}:/data/external_certs:ro
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
+    # The real name of the network is defined in your npm.conf
+    name: ${PROXY_NETWORK}
