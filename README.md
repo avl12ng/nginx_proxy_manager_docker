@@ -68,6 +68,16 @@ CUSTOM_CERTIFICATES=(
 ```
 ---
 
+## 🖥️ Log in to the Admin Panel
+
+URL: `http://<your-server-ip>:81`
+
+Default Credentials:
+- Email: changeme@example.com
+- Password: changeme
+
+---
+
 ## 🔒 SSL Management (External Certificates)
 
 This script automates the mapping of certificates managed outside of NPM (e.g., Certbot or manual).
@@ -76,15 +86,23 @@ This script automates the mapping of certificates managed outside of NPM (e.g., 
 - NPM ID: Create a "Custom Certificate" in the NPM Web UI (Port 81). The first one will be ID 1.
 - Symlinks: The script mounts your SSL root in Read-Only mode and creates symbolic links to `/data/custom_ssl/npm-X/` automatically.
 
----
+### 1. ⚠️ Prerequisite: Manual GUI Setup
+Before running the script for a new certificate, you **must** create a placeholder in the NPM Web UI to generate a certificate ID:
+- Log in to the Admin UI (Port 81).
+- Go to **SSL Certificates** > **Add SSL Certificate** > **Custom**.
+- Give it a name (e.g., `test.org`) and upload any dummy `fullchain.pem` and `privkey.pem` files to satisfy the interface.
+- Save it. Note the ID assigned (the first one is usually `1`).
 
-## 🖥️ Log in to the Admin Panel
+### 2. Automation Process
+Once the placeholder exists:
+- **Host Structure**: Ensure your real certificates are in `/data/ssl/domain.tld/`.
+- **Configuration**: Add the mapping in `npm.conf` (e.g., `"1:test.org"`).
+- **Execution**: Run `./npm_build.sh`.
 
-URL: `http://<your-server-ip>:81`
-
-Default Credentials:
-- Email: admin@example.com
-- Password: changeme
+The script will:
+- Mount your SSL root in Read-Only mode.
+- Create symbolic links from your host files to the internal `/data/custom_ssl/npm-X/` directory, effectively overwriting the dummy files with your real certificates.
+- Reload Nginx to apply changes instantly.
 
 ---
 
